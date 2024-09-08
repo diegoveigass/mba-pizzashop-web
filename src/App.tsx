@@ -1,5 +1,9 @@
+import { Button } from './components/ui/button'
+
 export function App() {
   return (
-    <h1>pizzashop</h1>
+    <div className="flex justify-center items-center h-screen">
+      <Button>aperte -me</Button>
+    </div>
   )
 }
