@@ -8,6 +8,8 @@ import { z } from 'zod'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
+import { useMutation } from '@tanstack/react-query'
+import { signIn } from '@/api/sign-in'
 
 const signInFormSchema = z.object({
   email: z.string().email(),
@@ -24,9 +26,13 @@ export function SignIn() {
     resolver: zodResolver(signInFormSchema),
   })
 
+  const { mutateAsync: authenticate } = useMutation({
+    mutationFn: signIn,
+  })
+
   async function handleSignIn(data: SignInForm) {
     try {
-      await new Promise(resolve => setTimeout(resolve, 2000))
+      await authenticate({ email: data.email })
       console.log(data)
 
       toast.success('Enviamos um link de autenticação para seu e-mail.', {
@@ -45,9 +51,7 @@ export function SignIn() {
       <Helmet title="Login" />
       <div className="p-8">
         <Button variant="ghost" asChild className="absolute right-8 top-8">
-          <Link to="/sign-up">
-            Novo estabelecimento
-          </Link>
+          <Link to="/sign-up">Novo estabelecimento</Link>
         </Button>
         <div className="w-[350px] flex flex-col justify-center gap-6">
           <div className="flex flex-col gap-2 text-center">
@@ -71,11 +75,7 @@ export function SignIn() {
                 {...register('email')}
               />
             </div>
-            <Button
-              type="submit"
-              className="w-full"
-              disabled={isSubmitting}
-            >
+            <Button type="submit" className="w-full" disabled={isSubmitting}>
               Acessar painel
             </Button>
           </form>
