@@ -8,24 +8,35 @@ import {
 import { Helmet } from 'react-helmet-async'
 import { OrderTableRow } from './order-table-row'
 import { OrderTableFilters } from './order-table-filters'
-import {
-  Pagination,
-  PaginationContent,
-  PaginationEllipsis,
-  PaginationItem,
-  PaginationLink,
-  PaginationNext,
-  PaginationPrevious,
-} from '@/components/ui/pagination'
 import { ScrollArea, ScrollBar } from '@/components/ui/scroll-area'
 import { useQuery } from '@tanstack/react-query'
 import { getOrders } from '@/api/get-orders'
+import { useSearchParams } from 'react-router-dom'
+import { z } from 'zod'
+import { Pagination } from '@/components/pagination'
 
 export function Orders() {
+  const [searchParams, setSearchParams] = useSearchParams()
+
+  const pageIndex = z.coerce
+    .number()
+    .transform(page => page - 1)
+    .parse(searchParams.get('page') ?? '0')
+
+  console.log(pageIndex)
+
   const { data: result } = useQuery({
-    queryKey: ['orders'],
-    queryFn: getOrders,
+    queryKey: ['orders', pageIndex],
+    queryFn: () => getOrders({ pageIndex }),
   })
+
+  function handlePaginate(pageIndex: number) {
+    setSearchParams(state => {
+      state.set('page', String(pageIndex + 1))
+
+      return state
+    })
+  }
 
   return (
     <>
@@ -60,27 +71,14 @@ export function Orders() {
             </ScrollArea>
           </div>
 
-          <Pagination>
-            <PaginationContent>
-              <PaginationItem>
-                <PaginationPrevious href="#0" />
-              </PaginationItem>
-              <PaginationItem>
-                <PaginationLink isActive={true} href="#1">
-                  1
-                </PaginationLink>
-              </PaginationItem>
-              <PaginationItem>
-                <PaginationLink href="#2">2</PaginationLink>
-              </PaginationItem>
-              <PaginationItem>
-                <PaginationEllipsis />
-              </PaginationItem>
-              <PaginationItem>
-                <PaginationNext href="#" />
-              </PaginationItem>
-            </PaginationContent>
-          </Pagination>
+          {result?.meta && (
+            <Pagination
+              pageIndex={result.meta.pageIndex}
+              totalCount={result.meta.totalCount}
+              perPage={result.meta.perPage}
+              onPageChange={handlePaginate}
+            />
+          )}
         </div>
       </div>
     </>
