@@ -18,10 +18,15 @@ import {
   PaginationPrevious,
 } from '@/components/ui/pagination'
 import { ScrollArea, ScrollBar } from '@/components/ui/scroll-area'
+import { useQuery } from '@tanstack/react-query'
+import { getOrders } from '@/api/get-orders'
 
-type OrdersProps = {}
+export function Orders() {
+  const { data: result } = useQuery({
+    queryKey: ['orders'],
+    queryFn: getOrders,
+  })
 
-export function Orders(props: OrdersProps) {
   return (
     <>
       <Helmet title="Pedidos" />
@@ -46,8 +51,8 @@ export function Orders(props: OrdersProps) {
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {Array.from({ length: 10 }).map((_, index) => {
-                    return <OrderTableRow key={index} />
+                  {result?.orders.map(order => {
+                    return <OrderTableRow order={order} key={order.orderId} />
                   })}
                 </TableBody>
               </Table>
