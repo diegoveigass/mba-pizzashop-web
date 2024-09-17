@@ -16,7 +16,7 @@ import {
   type GetManagedRestaurantResponse,
 } from '@/api/get-managed-restaurant'
 import { useForm } from 'react-hook-form'
-import { nullable, z } from 'zod'
+import { z } from 'zod'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { updateProfile } from '@/api/update-profile'
 import { toast } from 'sonner'
