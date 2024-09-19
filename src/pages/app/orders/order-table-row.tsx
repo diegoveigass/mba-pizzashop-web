@@ -9,6 +9,9 @@ import relativeTime from 'dayjs/plugin/relativeTime'
 // import ptBR from 'dayjs/locale'
 import 'dayjs/locale/pt-BR'
 import { useState } from 'react'
+import { useMutation, useQueryClient } from '@tanstack/react-query'
+import { cancelOrder } from '@/api/cancel-order'
+import { GetOrdersResponse } from '@/api/get-orders'
 
 dayjs.extend(relativeTime)
 dayjs.locale('pt-BR')
@@ -25,6 +28,35 @@ type OrderTableRowProps = {
 
 export function OrderTableRow({ order }: OrderTableRowProps) {
   const [isDetailsOpen, setIsDetailsOpen] = useState(false)
+  const queryClient = useQueryClient()
+
+  const { mutateAsync: cancelOrderFn } = useMutation({
+    mutationFn: cancelOrder,
+    async onSuccess(_, { orderId }) {
+      const ordersCached = queryClient.getQueriesData<GetOrdersResponse>({
+        queryKey: ['orders'],
+      })
+
+      for (const [cacheKey, cacheData] of ordersCached) {
+        if (!cacheData) {
+          return
+        }
+
+        queryClient.setQueryData<GetOrdersResponse>(cacheKey, {
+          ...cacheData,
+          orders: cacheData.orders.map(order => {
+            if (order.orderId === orderId) {
+              return {
+                ...order,
+                status: 'canceled',
+              }
+            }
+            return order
+          }),
+        })
+      }
+    },
+  })
 
   return (
     <TableRow>
@@ -63,7 +95,12 @@ export function OrderTableRow({ order }: OrderTableRowProps) {
         </Button>
       </TableCell>
       <TableCell>
-        <Button variant="ghost" size="xs">
+        <Button
+          disabled={!['pending', 'processing'].includes(order.status)}
+          variant="ghost"
+          size="xs"
+          onClick={() => cancelOrderFn({ orderId: order.orderId })}
+        >
           <X className="size-3 mr-2" />
           Cancelar
         </Button>
