@@ -1,3 +1,4 @@
+import { getPopularProducts } from '@/api/get-popular-products'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import {
   type ChartConfig,
@@ -5,18 +6,33 @@ import {
   ChartTooltip,
   ChartTooltipContent,
 } from '@/components/ui/chart'
+import { useQuery } from '@tanstack/react-query'
 import { BarChart } from 'lucide-react'
 import { Pie, PieChart } from 'recharts'
 
-const chartData = [
-  { product: 'Pepperoni', amount: 45, fill: 'var(--color-first)' },
-  { product: '5 queijos', amount: 22, fill: 'var(--color-second)' },
-  { product: 'Calabresa', amount: 49, fill: 'var(--color-third)' },
-  { product: 'Portuguesa', amount: 41, fill: 'var(--color-fourth)' },
-  { product: 'Marguerita', amount: 25, fill: 'var(--color-fifth)' },
-]
+const COLORS = [
+  'var(--color-first)',
+  'var(--color-second)',
+  'var(--color-third)',
+  'var(--color-fourth)',
+  'var(--color-fifth)',
+] as const
 
 export function PopularProductsChart() {
+  const { data: popularProducts } = useQuery({
+    queryFn: getPopularProducts,
+    queryKey: ['metrics', 'popular-products'],
+  })
+
+  if (!popularProducts) return
+
+  const popularProductsWithColors = popularProducts.map((product, index) => {
+    return {
+      ...product,
+      fill: COLORS[index],
+    }
+  })
+
   const chartConfig = {
     first: {
       label: 'first',
@@ -58,7 +74,7 @@ export function PopularProductsChart() {
               content={<ChartTooltipContent hideLabel />}
             />
             <Pie
-              data={chartData}
+              data={popularProductsWithColors}
               dataKey="amount"
               nameKey="product"
               innerRadius={64}
