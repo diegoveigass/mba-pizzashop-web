@@ -7,7 +7,7 @@ import {
   ChartTooltipContent,
 } from '@/components/ui/chart'
 import { useQuery } from '@tanstack/react-query'
-import { BarChart } from 'lucide-react'
+import { BarChart, Loader2 } from 'lucide-react'
 import { Pie, PieChart } from 'recharts'
 
 const COLORS = [
@@ -24,9 +24,7 @@ export function PopularProductsChart() {
     queryKey: ['metrics', 'popular-products'],
   })
 
-  if (!popularProducts) return
-
-  const popularProductsWithColors = popularProducts.map((product, index) => {
+  const popularProductsWithColors = popularProducts?.map((product, index) => {
     return {
       ...product,
       fill: COLORS[index],
@@ -67,40 +65,46 @@ export function PopularProductsChart() {
         </div>
       </CardHeader>
       <CardContent>
-        <ChartContainer config={chartConfig} className="w-full max-h-[240px]">
-          <PieChart>
-            <ChartTooltip
-              cursor={false}
-              content={<ChartTooltipContent hideLabel />}
-            />
-            <Pie
-              data={popularProductsWithColors}
-              dataKey="amount"
-              nameKey="product"
-              innerRadius={64}
-              outerRadius={86}
-              strokeWidth={8}
-              cy="50%"
-              cx="50%"
-              labelLine={false}
-              label={({ payload, ...props }) => {
-                return (
-                  <text
-                    cx={props.cx}
-                    cy={props.cy}
-                    x={props.x}
-                    y={props.y}
-                    textAnchor={props.textAnchor}
-                    dominantBaseline={props.dominantBaseline}
-                    fill="hsla(var(--foreground))"
-                  >
-                    {`${payload.product} (${payload.amount})`}
-                  </text>
-                )
-              }}
-            />
-          </PieChart>
-        </ChartContainer>
+        {popularProductsWithColors ? (
+          <ChartContainer config={chartConfig} className="w-full max-h-[240px]">
+            <PieChart>
+              <ChartTooltip
+                cursor={false}
+                content={<ChartTooltipContent hideLabel />}
+              />
+              <Pie
+                data={popularProductsWithColors}
+                dataKey="amount"
+                nameKey="product"
+                innerRadius={64}
+                outerRadius={86}
+                strokeWidth={8}
+                cy="50%"
+                cx="50%"
+                labelLine={false}
+                label={({ payload, ...props }) => {
+                  return (
+                    <text
+                      cx={props.cx}
+                      cy={props.cy}
+                      x={props.x}
+                      y={props.y}
+                      textAnchor={props.textAnchor}
+                      dominantBaseline={props.dominantBaseline}
+                      fill="hsla(var(--foreground))"
+                    >
+                      {`${payload.product} (${payload.amount})`}
+                    </text>
+                  )
+                }}
+              />
+            </PieChart>
+          </ChartContainer>
+        ) : (
+          <div className="flex h-[240px] w-full items-center justify-center">
+            <Loader2 className="size-8 text-muted-foreground animate-spin" />
+          </div>
+        )}
       </CardContent>
     </Card>
   )

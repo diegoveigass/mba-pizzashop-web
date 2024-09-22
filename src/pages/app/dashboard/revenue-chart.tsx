@@ -1,4 +1,3 @@
-import { useMemo, useState } from 'react'
 import { getDailyRevenueInPeriod } from '@/api/get-daily-revenue-in-period'
 import {
   Card,
@@ -17,8 +16,10 @@ import { DateRangePicker } from '@/components/ui/date-range-picker'
 import { Label } from '@/components/ui/label'
 import { useQuery } from '@tanstack/react-query'
 import dayjs from 'dayjs'
+import { Loader2 } from 'lucide-react'
+import { useMemo, useState } from 'react'
 import type { DateRange } from 'react-day-picker'
-import { LineChart, CartesianGrid, XAxis, YAxis, Line } from 'recharts'
+import { CartesianGrid, Line, LineChart, XAxis, YAxis } from 'recharts'
 
 export function RevenueChart() {
   const [dateRange, setDateRange] = useState<DateRange | undefined>({
@@ -64,7 +65,7 @@ export function RevenueChart() {
         </div>
       </CardHeader>
       <CardContent>
-        {dailyRevenueInPeriod && (
+        {dailyRevenueInPeriod ? (
           <ChartContainer config={chartConfig} className="h-60 w-full">
             <LineChart
               accessibilityLayer
@@ -106,6 +107,10 @@ export function RevenueChart() {
               />
             </LineChart>
           </ChartContainer>
+        ) : (
+          <div className="flex h-[240px] w-full items-center justify-center">
+            <Loader2 className="size-8 text-muted-foreground animate-spin" />
+          </div>
         )}
       </CardContent>
     </Card>
