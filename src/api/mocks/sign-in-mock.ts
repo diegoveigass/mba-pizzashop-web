@@ -6,7 +6,7 @@ export const signInMock = http.post<never, SignInBody>(
   async ({ request }) => {
     const { email } = await request.json()
 
-    if (email === 'jonh.doe@example.com') {
+    if (email === 'john.doe@example.com') {
       return new HttpResponse(null, {
         status: 200,
         headers: {
